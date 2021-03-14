@@ -1,3 +1,4 @@
 /.idea/
 /runtime/filebot/.index/
 /runtime/filebot/botd.properties
+/runtime/filebot/fileshare.properties
