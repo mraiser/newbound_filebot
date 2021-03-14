@@ -1,0 +1,774 @@
+<!DOCTYPE HTML>
+<html>
+<head>
+
+<title>File Bot</title>
+
+<link rel="stylesheet" href="../botmanager/bootstrap-3.1.1-dist/css/bootstrap.min.css">
+<link rel="stylesheet" href="jqueryfileupload/css/jquery.fileupload.css">
+
+<link rel='stylesheet' href='../botmanager/themes/font.css'>
+<link rel="stylesheet" href="../botmanager/themes/newbound.min.css" />
+<link rel="stylesheet" href="../botmanager/themes/jquery.mobile.icons.min.css" />
+<link rel="stylesheet" href="../botmanager/jquerymobile_1_4_2/jquery.mobile.structure-1.4.2.min.css" />
+<script src="../botmanager/jquerymobile/jquery-1.9.1.min.js"></script>
+<script src="../botmanager/jquerymobile_1_4_2/jquery.mobile-1.4.2.min.js"></script>
+<script src="../botmanager/nav.js"></script>
+<meta name="viewport" content="width=device-width, initial-scale=1">
+
+<script src="jqueryfileupload/js/vendor/jquery.ui.widget.js"></script>
+<script src="jqueryfileupload/js/jquery.iframe-transport.js"></script>
+<script src="jqueryfileupload/js/jquery.fileupload.js"></script>
+<script src="../botmanager/bootstrap-3.1.1-dist/js/bootstrap.min.js"></script>
+
+
+<script src="../botmanager/nav.js"></script>
+<script src="spin.min.js"></script>
+
+<meta charset="utf-8">
+    
+    <style>
+body {
+	background-color:#CCCCCC;
+}
+
+.controls {
+	display: none;
+	position: relative;
+}
+
+.filebrowser {
+	border:2px solid;
+	border-radius:25px;
+	height:300px;
+	position:relative;
+	overflow:hidden;
+	font-size: xx-large;
+	background-color:#CCCCCC;
+}
+
+.fbheader {
+	padding:13px;
+	background-color:#0d0e11;
+	color:white;
+	position: absolute;
+	top:0px;
+	left:0px;
+	right:0px;
+	height:100px;
+	white-space: nowrap;
+}
+
+.fbb {
+	position:relative;
+	background-color:#CCCCCC;
+	padding:6px;
+	top:50px;
+}
+
+.fbc {
+	overflow-x:scroll;
+	white-space: nowrap;
+	height:235px;
+	position:relative;
+	-webkit-overflow-scrolling: touch;
+}
+
+.folder {
+	position:absolute;
+	top:0px;
+	overflow-x:hidden;
+	overflow-y:auto;
+	width:400px;
+	height:212px;
+	background-color: white;
+	border-right:2px solid;
+	border-right-color:black;
+}
+	
+.filerow {
+	background-color: white;
+	padding: 3px;
+	width:400px;
+	position:relative;
+	overflow:hidden;
+	cursor:pointer;
+}
+
+.selectedrow {
+	background-color: #AAAAFF;
+}
+
+.fileinfo {
+	border:2px solid;
+	border-radius:25px;
+	padding:25px;
+	height:300px;
+	font-size: xx-large;
+	background-color:#CCCCCC;
+	position:relative;
+	overflow-x:auto;
+	overflow-y:hidden;
+	white-space: nowrap;
+	margin-top:25px;
+}
+
+.fiimg {
+	float:left;
+	padding:25px;
+	margin-right: 25px;
+	width: 256px;
+	border:2px solid;
+	border-radius:25px;
+}
+
+.files {
+	font-size: medium;
+}
+
+#folderbuttons {
+	position:relative;
+	top:-20px;
+}
+
+.fsi {
+	font-size: x-large;
+}
+
+#commondirs a {
+    cursor: pointer;
+    color: blue;
+}
+
+#commondirs a:hover {
+    background-color: #AAAAAA;
+}
+
+.move {-webkit-animation: anim2 ease-in-out 3s infinite alternate; }
+@-webkit-keyframes anim2
+{
+   from {-webkit-transform: scale(1.0) }
+   50%  {-webkit-transform: scale(0.8) }
+   to   {-webkit-transform: scale(1.2) }
+}	
+
+select optgroup {
+  color: #505359;
+}
+
+optgroup option {
+  color: white;
+}
+
+	</style>
+</head>
+<body>
+	<div id='botcontrols' data-role='page'>
+		<div data-role="header">
+            <a href="../botmanager/index.html" data-role="none" data-ajax="false"><img src="../botmanager/img/menu.png" width="36px"height="36px"></a>
+			<h1 id="headertitle">File Bot</h1>
+			<div data-role="navbar" class="ui-body-b">
+				<ul>
+					<li><a onclick="swapControls(0);" id="topnav0" class="topnavitem">Files</a></li>
+					<li><a onclick="swapControls(1);" id="topnav2" class="topnavitem">Settings</a></li>
+				</ul>
+			</div><!-- /navbar -->
+		</div><!-- /header -->
+		<div data-role="content" data-theme="c"> 
+			<div id='controls0' class='controls'>
+				<select id='peerselect' onchange='$("#fbc").html("");loadFolder("/");' data-theme='a' style='background-color:#505359;'><option value='local'>local</option></select>
+				<div class='filebrowser'>
+					<div class='fbheader'>Path: <span id='pathspan'>/</div>
+					<div class='fbb'>
+						<div class='fbc' id='fbc'><div id='fbci' class='fbci'></div></div>
+					</div>
+				</div>
+				<div class='fileinfo' id='fileinfo'></div>
+			</div>
+			<div id='controls1' class='controls'>
+				<h2>Shared Files</h2>
+				<div id='fileshare'></div>
+				<div id='fsmsg'></div>
+				<a data-role='button' onclick='updateFileShare();' data-theme='a'>update</a>
+				<hr>
+				<a data-role='button' onclick='gotoAddShare();'>add...</a>
+			</div>
+		</div>
+        <div style='position:absolute;top:0px;left:0px;width:100%;height:100%;background-color:black;opacity:0.5;display:none;' id='cblock'></div>
+        <div id='addshare' style='position:absolute;top:100px;display:none;width:100%;'>
+            <div style='width:600px;margin-left:auto;margin-right:auto;background-color:white;'>
+                <div style='position:relative;'>
+			        <div data-role="header">
+			            <h1 id="headertitle">Share Directory</h1>
+			        </div><!-- /header -->
+			        <div data-role="content" data-theme="c"> 
+			                <div data-role="fieldcontain">
+			                    <label for="newfs">New Share</label>
+			                    <input type='text' id='newfs'>
+			                </div>
+			                <div data-role="fieldcontain">
+			                    <label for="newfspath">Path</label>
+			                    <input type='text' id='newfspath'>
+			                </div>
+			                <hr>
+			                <div id='commondirs'></div>
+			                <hr>
+			                <a data-role='button' onclick='addFileShare();' data-theme='a'>add share</a>
+			        </div>
+                    <div style='position:absolute;top:10px;right:10px; padding:3px;border-color:black;border-width:thin;border-style:solid;cursor:pointer;' onclick='hideAddShare();'>X</div>
+			    </div>
+		    </div>
+	    </div>
+        
+	</div>
+
+<script src="http://netdna.bootstrapcdn.com/bootstrap/3.0.3/js/bootstrap.min.js"></script>
+<script src="/filebot/jquery.ui.widget.js"></script>
+<script src="/filebot/jqueryfileupload/js/jquery.iframe-transport.js"></script>
+<script src="/filebot/jqueryfileupload/js/jquery.fileupload.js"></script>
+	
+<script type='text/javascript'>
+/*jslint unparam: true */
+/*global window, $ */
+
+function swapControls(n) {
+	  $('.topnavitem').removeClass('ui-btn-active');
+	  $('#topnav'+n).addClass('ui-btn-active');
+	  $('.controls').css('display', 'none');
+	  $('#controls'+n).css('display', 'block');
+}
+
+function getQueryParameter ( parameterName ) {
+	  var queryString = window.top.location.search.substring(1);
+	  var parameterName = parameterName + "=";
+	  if ( queryString.length > 0 ) {
+	    begin = queryString.indexOf ( parameterName );
+	    if ( begin != -1 ) {
+	      begin += parameterName.length;
+	      end = queryString.indexOf ( "&" , begin );
+	        if ( end == -1 ) {
+	        end = queryString.lengthblock
+	      }
+	      return unescape ( queryString.substring ( begin, end ) );
+	    }
+	  }
+	  return "null";
+}
+
+var filetypes = [ 'aac', 'ai', 'aiff', 'avi', 'bmp', 'c', 'cpp', 'css', 'dat', 'dmg', 'doc', 'dotx', 'dwg', 'dxf', 'eps', 'exe', 'flv', 'gif', 'h', 'hpp', 'html', 'ics', 'iso', 'java', 'jpg', 'js', 'key', 'less', 'mid', 'mp3', 'mp4', 'mpg', 'odf', 'ods', 'odt', 'otp', 'ots', 'ott', 'pdf', 'php', 'png', 'ppt', 'psd', 'py', 'qt', 'rar', 'rb', 'rtf', 'sass', 'scss', 'sql', 'tga', 'tgz', 'tiff', 'txt', 'wav', 'xls', 'xlsx', 'xml', 'yml', 'zip' ];
+var sizes = [ "b ", "kb", "mb", "gb", "tb", "pb" ];
+
+function loadFile(path){
+	var pp = path.substring(0,path.lastIndexOf('/'));
+	if (pp == '') pp = '/';
+	var p = document.getElementById('d'+pp);
+	$(p).nextAll('div').remove();
+	$(p).children('div').removeClass('selectedrow');
+	var row = document.getElementById('f'+path);
+	$(document.getElementById('f'+path)).addClass('selectedrow');
+	
+	$(p).scrollTop($(p).scrollTop()+$(row).position().top-$('#fbc').height()/2);
+	
+	var xx = p.data;
+	for (var i=0;i<xx.size;i++) if (xx.list[i].path == path) {
+		showFile(xx.list[i]);
+		break;
+	}
+}
+
+function showFile(xx){
+	CURFILE = xx.path;
+	var img;
+	if (xx.directory) img = 'folder.svg';
+	else {
+		var yy = xx.name.lastIndexOf(".");
+		if (yy != -1) {
+			var zz = filetypes.indexOf(xx.name.substring(yy+1).toLowerCase());
+			if (zz != -1) img = 'icons/512px/'+filetypes[zz]+".png";
+		}		
+	}
+	if (img == null) img = 'icons/32px/_blank.png';
+	
+	var size = xx.size;
+	var oom = 0;
+	while (size > 1024) 
+	{
+		size = size / 1024;
+		oom++;
+	}
+	var len = size.toFixed(2)+" "+sizes[oom];
+	
+	var rel = locate(curpath);
+	var ftp = 'ftp://localhost:2626/' + ($('#peerselect').val() == 'local' ? 'local' : 'remote/'+$('#peerselect').val())+xx.path;
+	
+	var newhtml 
+		= '<a href="'+(xx.directory ? '#' : rel+'local'+xx.path+'?sessionid='+sessionid)+'" target="_blank"><img class="fiimg" src="'+rel+'img/'+img+'?sessionid='+sessionid+'"></a><b>Path: '+xx.path+'</b>'
+		+ '<font style="font-size:x-large;">'
+		+ '<div style="margin-top:10px;">Size: '+(xx.directory ? xx.count+" files" : len)+'</div>'
+		+ '<div>Last Modified: '+new Date(xx.modified)
+		+ '</div><div><a href="'+$('<div>').html(ftp).text()+'">'+ftp+'</a>'
+		+ '</div></font>';
+	
+	if (!xx.directory) newhtml 
+		+= '<br><a data-theme="a" data-ajax="false" data-inline="true" data-role="button" href="'+rel+'local'+xx.path+'?sessionid='+sessionid+'&filebotdownload=true" download>download file</a>'
+		+  '<a data-inline="true" data-role="button" onclick="deleteFile(\''+xx.path+'\');" style="margin-left:50px;">delete file</a><span id="delmsg" style="font-size:small;"></span>'
+		+  '&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<a data-ajax="false" href="'+rel+'local'+xx.path+'">link</a>'
+	else if (xx.path != "/") {
+		newhtml += '<div style="display:inline-block;width:600px;"><form action="'+locate(xx.path)+'uploadfile" enctype="mime/multipart">'
+		+ '<span class="btn btn-success fileinput-button"><i class="glyphicon glyphicon-plus"></i><span>Drag file or click here to upload...</span>'
+	    + '<input id="fileupload" type="file" name="files[]" onchange="$(\'#funame\').val(this.value)"></span><div id="progress" class="progress"><div class="progress-bar progress-bar-success">'
+	    + '</div></div><div id="files" class="files"></div><input type="hidden" name="path" value="'+xx.path+'"><input type="hidden" id="funame" name="name" value=""></form>'
+	    + '<div id="folderbuttons"><a data-ajax="false" data-theme="a" data-inline="true" data-role="button" href="'+rel+'zipdir/'+encodeURIComponent(xx.name+'.zip')+'?path='+encodeURIComponent(xx.path)+'" download>download as zip</a>'
+	    + '<a data-inline="true" data-role="button" onclick="deleteDir(\''+xx.path+'\');">delete folder</a>'
+	    + '<a style="margin-left:150px;" data-theme="b" data-inline="true" data-role="button" onclick="newDir(\''+xx.path+'\');">new folder</a>'
+	    + '</div></div>';
+	    
+		
+//		newhtml += '<br><br><form type="mime/multipart"><table border="0" cellpadding="0" cellspacing="0"><tr><td>Upload File: </td>'
+//		+'<td><input type="file" id="upfile" name="upfile" onchange="$(this).closest(\'form\').trigger(\'submit\');"></td></tr></table></form>';
+	}
+	
+	$('#fileinfo').html(newhtml);
+	if (!xx.directory) $('#fileinfo').trigger('create');
+	else $('#folderbuttons').trigger('create');
+
+    var spinner = null;
+/*
+    $(function () {
+	    'use strict';
+
+        // Change this to the location of your server-side upload handler:
+	    var url = locate(xx.path)+'uploadfile';
+	    
+	    $('#fileupload').fileupload({
+	        url: url,
+	        dataType: 'json',
+	        done: function (e, data) {
+	        	$('#cblock').css('display', 'none');
+	            spinner.stop();
+	        	
+	        	$('#files').html('File uploaded successfully.<br><br>');
+	            setTimeout('loadFolder(curpath);', 1000);
+	            setTimeout('loadFile(curpath+"/'+data.result.files[0].name+'");', 1500);
+	        },
+	        progressall: function (e, data) {
+	            var progress = parseInt(data.loaded / data.total * 100, 10);
+	            $('#progress .progress-bar').css(
+	                'width',
+	                progress + '%'
+	            );
+	        }
+	    }).prop('disabled', !$.support.fileInput)
+	        .parent().addClass($.support.fileInput ? undefined : 'disabled');
+	});
+	
+	$('#fileupload').bind('fileuploaddrop', function (e, data) {
+		$('#funame').val(data.files[0].name);
+		
+		  var opts = {
+		      lines: 13, // The number of lines to draw
+		      length: 20, // The length of each line
+		      width: 10, // The line thickness
+		      radius: 30, // The radius of the inner circle
+		      corners: 1, // Corner roundness (0..1)
+		      rotate: 0, // The rotation offset
+		      direction: 1, // 1: clockwise, -1: counterclockwise
+		      color: '#000', // #rgb or #rrggbb or array of colors
+		      speed: 1, // Rounds per second
+		      trail: 60, // Afterglow percentage
+		      shadow: false, // Whether to render a shadow
+		      hwaccel: false, // Whether to use hardware acceleration
+		      className: 'spinner', // The CSS class to assign to the spinner
+		      zIndex: 2e9, // The z-index (defaults to 2000000000)
+		      top: '50%', // Top position relative to parent
+		      left: '50%' // Left position relative to parent
+		  };
+		  var target = document.getElementById('controls0');
+		  spinner = new Spinner(opts).spin(target);
+          $('#cblock').css('display', 'block');
+	});
+	
+*/
+
+
+
+}
+
+
+var dropZone = document.getElementById('fileinfo');
+
+// Optional.   Show the copy icon when dragging over.  Seems to only work for chrome.
+dropZone.addEventListener('dragover', function(e) {
+	e.stopPropagation();
+	e.preventDefault();
+	e.dataTransfer.dropEffect = 'copy';
+});
+
+// Get file data on drop
+dropZone.addEventListener('drop', function(e) {
+
+	var opts = {
+		lines: 13, // The number of lines to draw
+		length: 20, // The length of each line
+		width: 10, // The line thickness
+		radius: 30, // The radius of the inner circle
+		corners: 1, // Corner roundness (0..1)
+		rotate: 0, // The rotation offset
+		direction: 1, // 1: clockwise, -1: counterclockwise
+		color: '#000', // #rgb or #rrggbb or array of colors
+		speed: 1, // Rounds per second
+		trail: 60, // Afterglow percentage
+		shadow: false, // Whether to render a shadow
+		hwaccel: false, // Whether to use hardware acceleration
+		className: 'spinner', // The CSS class to assign to the spinner
+		zIndex: 2e9, // The z-index (defaults to 2000000000)
+		top: '50%', // Top position relative to parent
+		left: '50%' // Left position relative to parent
+	};
+	var target = document.getElementById('controls0');
+	spinner = new Spinner(opts).spin(target);
+	$('#cblock').css('display', 'block');
+
+
+	e.stopPropagation();
+	e.preventDefault();
+	var files = e.dataTransfer.files; // Array of all files
+
+	for (var i=0, file; file=files[i]; i++) {
+	  var url = locate(CURFILE)+'uploadfile';
+	  
+	  var formData = new FormData();
+	  formData.append("file", file);
+	  formData.append("name", file.name);
+	  formData.append("path", CURFILE);
+  //				formData.append("files[]", files);
+	  var xhr = new XMLHttpRequest();
+	  xhr.open('POST', url, true);
+	  xhr.onload = function (val) {
+		var response = JSON.parse(val.currentTarget.response);
+		console.log("RESPONSE: "+val.currentTarget.response);
+		if (response.status != 'ok'){
+		  $('#cblock').css('display', 'none');
+		  spinner.stop();
+		  alert(JSON.stringify(response));
+		}
+		else {
+		  $('#cblock').css('display', 'none');
+		  spinner.stop();
+		  
+		  $('#files').html('File uploaded successfully.<br><br>');
+		  setTimeout('loadFolder(curpath);', 1000);
+		  setTimeout('loadFile(curpath+"/'+data.result.files[0].name+'");', 1500);
+		}
+	  };
+	  xhr.send(formData);
+	}
+});
+
+
+
+function locate(){
+	var ret = '';
+	var path = opath;
+	var suff = $('#peerselect').val() == 'local' ? '' : '../peerbot/remote/'+$('#peerselect').val()+'/filebot/';
+	if (path == '/') return suff;
+	
+	while (path.indexOf('/') != -1){
+		ret += '../';
+		path = path.substring(path.indexOf('/')+1);
+	}
+	if (document.URL.substring(document.URL.length-1) == '/') ret += '../';
+	return ret+suff;
+}
+
+function deleteFile(path){
+	if (confirm("Are you sure you want to delete the file "+path.substring(path.lastIndexOf('/')+1)+"?")){
+		$('#delmsg').html('Deleting file...');
+		json(locate(curpath)+'deletefile','path='+encodeURIComponent(path)+'&peer='+encodeURIComponent($('#peerselect').val()), function(){
+			$('#delmsg').html('File deleted successfully.');
+	        setTimeout('loadFolder(curpath);', 1000);
+		});
+	}
+}
+
+function deleteDir(path){
+	if (confirm("Are you sure you want to delete the folder "+path.substring(path.lastIndexOf('/')+1)+"?")){
+		$('#files').html('Deleting folder...');
+		json(locate(curpath)+'deletefolder','path='+encodeURIComponent(path)+'&peer='+encodeURIComponent($('#peerselect').val()), function(){
+			$('#files').html('folder deleted successfully.<br><br>');
+	        setTimeout('loadFolder(curpath.substring(0,curpath.lastIndexOf("/")));', 1000);
+		});
+	}
+}
+
+function loadFolder(path){
+	var pp = path.substring(0,path.lastIndexOf('/'));
+	if (pp == '') pp = '/';
+	var p = document.getElementById('d'+pp);
+	var killme = null;
+	if (p) {
+		killme = $(p).nextAll('div');
+		$(p).children('div').removeClass('selectedrow');
+	}
+	else $('#fbc').html('');
+	
+	curpath=path;
+	var row = document.getElementById('f'+curpath);
+	if (row){
+		$(row).addClass('selectedrow');
+		$(p).scrollTop($(p).scrollTop()+$(row).position().top-$('#fbc').height()/2);
+	}
+	
+	var rel = locate(curpath);
+	json(rel+"fileinfo","children=y&path="+encodeURIComponent(curpath)+'&peer='+encodeURIComponent($('#peerselect').val()), function(result){
+		if (killme) killme.remove();
+		var newhtml = "<div class='folder' id='d"+curpath+"' style='left:"+(400*($('.folder').length))+"px;'>";
+		result.count = 0;
+		for (var item in result.list){
+			var xx = result.list[item]
+			var rli = xx.name;
+			if (!rli.indexOf('.')==0 && !xx.path.indexOf('/.')==0){
+				result.count++;
+				var newpath = curpath == "/" ? "/"+rli : curpath+"/"+rli;
+				var img = null;
+				var typ = null;
+				if (xx.directory) {
+					img = rel+'img/folder.svg';
+					typ='Folder';
+				}
+				else {
+					var yy = rli.lastIndexOf(".");
+					if (yy != -1) {
+						var zz = filetypes.indexOf(rli.substring(yy+1).toLowerCase());
+						if (zz != -1) img = rel+'img/icons/32px/'+filetypes[zz]+".png";
+					}
+					typ='File';
+				}
+				if (img == null) img = rel+'img/icons/32px/_blank.png';
+				
+				newhtml += "<div class='filerow' id='f"+newpath+"' onclick='load"+typ+"(\""+newpath+"\");'><img src='"+img+"?sessionid="+sessionid+"'> "+rli+"</div>";
+			}
+		}
+		newhtml+='</div>';
+		$('#fbc').append(newhtml);
+		document.getElementById('d'+curpath).data = result;
+		
+		var w = 400 * $('.folder').length;
+		$('#fbci').width(w);
+		
+		$('#fbc').scrollLeft(w-$('#fbb').width());
+		
+		showFile(result);
+		$(window).resize();
+
+		var trail = "";
+		var chop = curpath+"/";
+		var relpath="";
+		var qq = locate(curpath);
+		while (chop != '') {
+			var n = chop.indexOf("/");
+			var f = chop.substring(0,n+1);
+			chop = chop.substring(n+1);
+			trail += f; //'<a href="'+(n==0 ? qq : qq+'local'+relpath+f)+'" data-ajax="false">'+f+'</a>';
+			relpath += f;
+			if (curpath == "/") break;
+		}
+		$('#pathspan').html(trail);
+
+	});
+}
+
+function newDir(path){
+	var name = prompt("Name of new folder", "untitled");
+	if (name) {
+		$('#files').html('Creating folder...');
+		json(locate(curpath)+'newfolder','path='+encodeURIComponent(path)+'&name='+encodeURIComponent(name)+'&peer='+encodeURIComponent($('#peerselect').val()), function(){
+			$('#files').html('folder created successfully.<br><br>');
+	        setTimeout('loadFolder(curpath);', 1000);
+	        setTimeout('loadFolder(curpath+"/'+name+'");', 1500);
+		});
+	}
+}
+
+function loadSettings(){
+	var rel = locate(curpath);
+	json(rel+"fileinfo","children=y&path="+encodeURIComponent("/"), function(result){
+		var newhtml='';
+		for (var item in result.list){
+			var rli = result.list[item];
+			newhtml += buildShare(rli.name, rli.realpath);
+		}
+		$('#fileshare').html(newhtml);
+		$('#fileshare').trigger('create');
+	});
+}
+
+function buildShare(name, realpath){
+	return '<div data-role="fieldcontain" class="shared" id="mfs_'+name+'"><label for="fs_'+name
+		+ '"><a data-inline="true" data-role="button" onclick="deleteFileShare(\''+name+'\');">x</a> <span class="fsi">'+name + '</span></label>'
+		+ '<input type="text" id="fs_'+name+'" class="fsv" value="'+realpath+'" data-inline="true"></div>';
+}
+
+function deleteFileShare(name){
+	$('#mfs_'+name).remove();
+	$('#fsmsg').html('Click the update button to save your changes');
+}
+
+function updateFileShare(){
+	var shared = document.querySelectorAll(".shared");
+	var params = '';
+	for (var item in shared){
+		var x = shared[item];
+		if (x.querySelectorAll) {
+			var name = x.querySelectorAll(".fsi")[0].innerHTML;
+			var realpath = x.querySelectorAll("#fs_"+name)[0].value;
+			if (params != '') params += "\r"
+			params += name+"\t"+realpath;
+		}
+	}	
+	var rel = locate(curpath);
+	json(rel+"updatefileshare","v="+encodeURIComponent(params), function(result){
+		$('#fsmsg').html(result.status == 'ok' ? "File sharing settings have been updated." : "There was an error updating the file sharing settings: "+result.msg);
+		setTimeout("$('#fsmsg').html('');",3000);
+		$('#fbc').html('');
+		loadFolder("/");
+	});
+}
+
+function hideAddShare(){
+    $("#cblock").css('display', 'none');
+    $("#addshare").css('display', 'none');
+}
+
+function gotoAddShare()
+{
+    $("#cblock").css('display', 'block');
+    $("#addshare").css('display', 'block');
+}
+
+function addFileShare() {
+	var name=$('#newfs').val().trim();
+	var realpath=$('#newfspath').val().trim();
+	if (name == '') alert('Share name cannot be blank');
+	else if (realpath == '') alert('Path cannot be blank');
+	else {
+		var newhtml = buildShare(name, realpath);
+		$('#fileshare').append(newhtml);
+		$('#fileshare').trigger('create');
+//		$('#fsmsg').html('Click the update button to save your changes');
+	    hideAddShare();
+	    updateFileShare();
+	    swapControls(1);
+	}
+}
+
+$(window).resize(function(e){
+	var w = $(window).width();
+	if (w<1024) w=1024;
+	
+	var p = $('#controls0').width()/w
+	var l = ($('#controls0').width()-w)*p/2;
+	var t = (p-1)*320;
+//	console.log($('#controls0').width()+"/"+l);
+//	$('#controls0').effect('scale', {scale:'content',percent:50}, 1000);
+//	$('head').append('<style>@-webkit-keyframes resanim'+nextx+' { from {-webkit-transform: scale(1.0);} to {-webkit-transform: scale(0.5);} } #controls0 { -webkit-animation: resanim'+nextx+' 0s; }</style>');
+	$('head').append('<style>#controls0 { -webkit-transform: scale('+p+'); position:relative;left:'+l+'px;top:'+t+'px;} .filebrowser { width:'+w+'px; } .fileinfo { width:'+w+'px; }</style>');
+//	nextx++;
+});
+
+$(document).on('pagecreate', function() {
+	if (getQueryParameter('header') == 'false') $('#headertitle').css('display', 'none');
+	swapControls(0);
+	loadFolder(curpath);
+	loadSettings();
+	
+	json('listcommonfolders', null, function(result){
+		var newhtml='<b>Common Folders:</b><br>'
+		for (var item in result.data){
+			newhtml += '&nbsp;&nbsp;&nbsp;<a onclick="$(\'#newfs\').val(\''+item+'\');$(\'#newfspath\').val(\''+result.data[item]+'\');">'+item+'='+result.data[item]+'</a><br>';
+		}
+		$('#commondirs').html(newhtml);
+	});
+	
+	var rel = locate(curpath);
+	json(rel+'../peerbot/connections', null, function(result) {
+		var newhtml = "<option value='local' selected>local</option>";
+		var conh = "<optgroup label='connected'>";
+		var offh = "<optgroup label='offline'>";
+		for (var item in result.data){
+			var rdi = result.data[item];
+			var x = '<option value="'+rdi.id+'">'+rdi.name+'</option>';
+			if (rdi.connected) conh += x;
+			else offh += x;
+		}
+		newhtml += conh + '</optgroup>' + offh + '</optgroup>';
+		$('#peerselect').html(newhtml);
+		$('#peerselect').trigger('create');
+	});
+	
+	document.addEventListener('keydown', function(event) {
+	    if(event.keyCode == 37) { // left
+	    	var sel = CURFILE != curpath ? curpath : curpath.substring(0,curpath.lastIndexOf('/'));
+	    	var x = document.getElementById('d'+sel);
+	    	if (x) loadFolder(sel);
+	    }
+	    else if(event.keyCode == 39) { // right
+	        if (CURFILE == curpath){
+	        	var data = document.getElementById('d'+curpath).data;
+	        	var xx = data.list[0];
+	        	if (xx) if (xx.directory) loadFolder(xx.path);
+	        	else loadFile(xx.path);
+	        }
+	    }
+	    else if(event.keyCode == 40) { // down
+	    	var sel = CURFILE != curpath ? curpath : curpath.substring(0,curpath.lastIndexOf('/'));
+	    	var x = document.getElementById('d'+sel);
+	    	if (x) {
+	        	var data = x.data.list;
+	        	var n = data.length;
+	        	var i = -1;
+	        	for (var i=0; i<n; i++){
+	        		if (data[i].path == CURFILE) break;
+	        	}
+	        	var xx = data[i+1];
+	        	if (xx){
+	        		curpath = sel;
+		        	if (xx.directory) loadFolder(xx.path);
+		        	else loadFile(xx.path);
+		        	event.preventDefault();
+	        	}
+	    	}
+	    }
+	    else if(event.keyCode == 38) { // up
+	    	var sel = CURFILE != curpath ? curpath : curpath.substring(0,curpath.lastIndexOf('/'));
+	    	var x = document.getElementById('d'+sel);
+	    	if (x) {
+	        	var data = x.data.list;
+	        	var n = data.length;
+	        	var i = -1;
+	        	for (var i=0; i<n; i++){
+	        		if (data[i].path == CURFILE) break;
+	        	}
+	        	if (i>0){
+		        	var xx = data[i-1];
+		        	if (xx){
+		        		curpath = sel;
+			        	if (xx.directory) loadFolder(xx.path);
+			        	else loadFile(xx.path);
+			        	event.preventDefault();
+		        	}
+	        	}
+	    	}
+	    }
+//	    else console.log(event.keyCode);
+	});
+});
+$(window).resize();
+
+var curpath = "/";
+var opath = curpath;
+var CURFILE = curpath;
+</script>
+
+</body>
+</html>

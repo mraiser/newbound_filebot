@@ -1,0 +1,32 @@
+<html>
+  <head>
+    <title>File Browser</title>
+
+    <link rel='stylesheet' href='../botmanager/themes/font.css'>
+    <link rel="stylesheet" href="../botmanager/themes/newbound.min.css" />
+    <link rel="stylesheet" href="../botmanager/themes/jquery.mobile.icons.min.css" />
+    <link rel="stylesheet" href="../botmanager/jquerymobile_1_4_2/jquery.mobile.structure-1.4.2.min.css" />
+    <script src="../botmanager/jquerymobile/jquery-1.9.1.min.js"></script>
+    <script src="../botmanager/jquerymobile_1_4_2/jquery.mobile-1.4.2.min.js"></script>
+    <script src="../botmanager/nav.js"></script>
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    
+    <script src="browse.js"></script>
+  </head>
+  <body>
+    <div id='botcontrols' data-role='page'>
+        <div data-role="header">
+            <h1 id="headertitle">File Browser</h1>
+        </div>
+        <div id='filebrowser'></div>
+    </div>
+    
+    <script type='text/javascript'>
+    $(document).on('pagecreate', function() {
+        fileBrowser('filebrowser', function(result){
+            console.log(result);
+        });
+    });
+    </script>
+
+</html>
