@@ -1,15 +1,6 @@
 package com.newbound.robot;
 
-import java.io.ByteArrayOutputStream;
-import java.io.File;
-import java.io.FileInputStream;
-import java.io.FileOutputStream;
-import java.io.FilenameFilter;
-import java.io.IOException;
-import java.io.InputStream;
-import java.io.OutputStream;
-import java.io.PipedInputStream;
-import java.io.PipedOutputStream;
+import java.io.*;
 import java.net.URL;
 import java.net.URLDecoder;
 import java.nio.file.FileVisitResult;
@@ -28,7 +19,7 @@ import org.json.JSONObject;
 import com.newbound.net.mime.MIMEMultipart;
 import com.newbound.net.service.Socket;
 
-public class FileBot extends BotBase 
+public class FileBot extends MetaBot
 {
 //	FTPService mFTPServer = null;
 	Hashtable<String, DirectoryIndex> mIndex = new Hashtable();
@@ -57,7 +48,10 @@ public class FileBot extends BotBase
 //				mFTPServer = new FTPService(this, 2626);
 			if (PROPERTIES.getProperty("searchindex", "false").equals("true"))
 			{
-				File workdir = new File(getRootDir(), ".index");
+				File workdir;
+
+				if (PROPERTIES.getProperty("indexworkdir") != null) workdir = new File(PROPERTIES.getProperty("indexworkdir"));
+				else workdir = new File(getRootDir(), ".index");
 				mIndexContent = PROPERTIES.getProperty("indexcontent", "true").equals("true");
 
 				Enumeration shares = mShared.propertyNames();
@@ -73,18 +67,12 @@ public class FileBot extends BotBase
 							(short)3,
 							1,
 							mIndexContent,
-							50 * 1024 * 1024);
+							5 * 1024 * 1024);
 					mIndex.put(share, di);
 				}
 			}
 		}
 		catch (Exception x) { x.printStackTrace(); }
-	}
-
-	protected String handleShutdown(Hashtable params) throws Exception 
-	{
-//		mFTPServer.close();
-		return super.handleShutdown(params);
 	}
 
 	private void loadSharedFiles() throws Exception
@@ -136,7 +124,7 @@ public class FileBot extends BotBase
 		throw new Exception("Unknown command");
 	}
 	
-	public JSONObject getCommands() throws Exception
+	public JSONObject getCommands()
 	{
 		JSONObject commands = new JSONObject();
 		JSONObject cmd;
@@ -283,9 +271,20 @@ public class FileBot extends BotBase
 		File f = getLocalFile(path);
 		if (f == null)  throw new Exception("Directory not found: "+share);
 
-		di.index(f);
-
 		JSONObject jo = newResponse();
+
+		try {
+			di.index(f);
+		}
+		catch (Exception x) {
+			jo.put("status", "err");
+			jo.put("msg", x.getMessage());
+			f = new File(getRootDir(), "directoryindex_error.txt");
+			PrintWriter pw = new PrintWriter(new FileWriter(f));
+			x.printStackTrace(pw);
+			pw.close();
+		}
+
 		return jo;
 	}
 
@@ -314,13 +313,15 @@ public class FileBot extends BotBase
 			public FileVisitResult visitFile(Object o, BasicFileAttributes basicFileAttributes) throws IOException
 			{
 				String found = "/"+share+((File)o).getCanonicalPath().substring(sharepath.length());
-				JSONObject jo = new JSONObject();
-				jo.put("guid", uuid);
-				jo.put("msg", ((File)o).getCanonicalPath());
-				if (uuid != null)
-				//BotBase.getBot(botname).
-						sendWebsocketMessage(jo.toString());
-				else ja.put(found);
+				if (uuid != null) {
+					JSONObject jo = new JSONObject();
+					jo.put("msg", found);
+					jo.put("guid", uuid);
+					//BotBase.getBot(botname).
+					sendWebsocketMessage(jo.toString());
+				}
+				//else
+					ja.put(found);
 				return null;
 			}
 		};
