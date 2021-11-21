@@ -10,6 +10,7 @@ import java.nio.file.attribute.BasicFileAttributes;
 import java.util.*;
 
 import com.newbound.net.mime.Base64Coder;
+import com.newbound.net.service.http.HTTPService;
 import com.newbound.util.DirectoryIndex;
 import com.newbound.util.NoDotFilter;
 import org.json.JSONArray;
@@ -46,33 +47,48 @@ public class FileBot extends MetaBot
 			loadSharedFiles();
 //			if (PROPERTIES.getProperty("startftp", "false").equals("true"))
 //				mFTPServer = new FTPService(this, 2626);
-			if (PROPERTIES.getProperty("searchindex", "false").equals("true"))
-			{
-				File workdir;
-
-				if (PROPERTIES.getProperty("indexworkdir") != null) workdir = new File(PROPERTIES.getProperty("indexworkdir"));
-				else workdir = new File(getRootDir(), ".index");
-				mIndexContent = PROPERTIES.getProperty("indexcontent", "true").equals("true");
-
-				Enumeration shares = mShared.propertyNames();
-				while (shares.hasMoreElements())
-				{
-					String share = (String) shares.nextElement();
-					String path = mShared.getProperty(share);
-					DirectoryIndex di = new DirectoryIndex(
-							new File(path),
-							workdir,
-							new NoDotFilter(),
-							"abcdefghijklmnopqrstuvwxyz0123456789.-_",
-							(short)3,
-							1,
-							mIndexContent,
-							5 * 1024 * 1024);
-					mIndex.put(share, di);
-				}
-			}
+			loadSearchIndexes();
 		}
 		catch (Exception x) { x.printStackTrace(); }
+	}
+
+	private void loadSearchIndexes() {
+		mIndex.clear();
+		if (PROPERTIES.getProperty("searchindex", "false").equals("true"))
+		{
+			File workdir;
+
+			if (PROPERTIES.getProperty("indexworkdir") != null) workdir = new File(PROPERTIES.getProperty("indexworkdir"));
+			else workdir = new File(getRootDir(), ".index");
+			mIndexContent = PROPERTIES.getProperty("indexcontent", "true").equals("true");
+
+			File root = getRootDir();
+			File f = new File(root, "excludefromsearch.txt");
+			String[] excludes = null;
+			if (f.exists()) try {
+				String s = new String(BotUtil.readFile(f));
+				excludes = s.split("\n");
+			}
+			catch (Exception x) { x.printStackTrace(); }
+
+			Enumeration shares = mShared.propertyNames();
+			while (shares.hasMoreElements())
+			{
+				String share = (String) shares.nextElement();
+				String path = mShared.getProperty(share);
+				DirectoryIndex di = new DirectoryIndex(
+						new File(path),
+						workdir,
+						new NoDotFilter(),
+						"abcdefghijklmnopqrstuvwxyz0123456789.-_",
+						(short)3,
+						1,
+						mIndexContent,
+						5 * 1024 * 1024);
+				if (excludes != null) di.exclude(excludes);
+				mIndex.put(share, di);
+			}
+		}
 	}
 
 	private void loadSharedFiles() throws Exception
@@ -264,12 +280,12 @@ public class FileBot extends MetaBot
 	private JSONObject handleIndex(String cmd, Hashtable params) throws Exception
 	{
 		String path = (String) params.get("path");
+		File f = getLocalFile(path);
+		if (f == null) throw new Exception("Directory not found: "+path);
+
 		String share = parseShare(path);
 		DirectoryIndex di = mIndex.get(share);
 		if (di == null) throw new Exception("No index for share: "+share);
-
-		File f = getLocalFile(path);
-		if (f == null)  throw new Exception("Directory not found: "+share);
 
 		JSONObject jo = newResponse();
 
@@ -535,7 +551,7 @@ public class FileBot extends MetaBot
 			String[] list = new String[mShared.size()];
 			int i = 0;
 			while (e.hasMoreElements()) list[i++] = (String)e.nextElement();
-			if (kids == null) o.put("list", toJSONArray(list));
+			if (kids == null || kids.equals("false")) o.put("list", toJSONArray(list));
 			else addKids(o, list, file, cmd);
 
 			o.put("size", mShared.size());
@@ -557,9 +573,11 @@ public class FileBot extends MetaBot
 			}
 			else
 			{
+				String path = f.getCanonicalPath();
+
 				o.put("name", name);
 				o.put("path", file);
-				o.put("realpath", f.getCanonicalPath());
+				o.put("realpath", path);
 				o.put("exists", f.exists());
 				o.put("modified", f.lastModified());
 				o.put("directory", f.isDirectory());
@@ -574,9 +592,14 @@ public class FileBot extends MetaBot
 					list = new String[jv.size()];
 					list = jv.toArray(list);
 					
-					if (kids == null) o.put("list", toJSONArray(list));
+					if (kids == null || kids.equals("false")) o.put("list", toJSONArray(list));
 					else addKids(o, list, file, cmd);
 					o.put("size", list.length);
+
+					String share = parseShare(file);
+					DirectoryIndex di = mIndex.get(share);
+					long index = di == null ? -1 : di.lastIndex(f);
+					o.put("lastindex", index);
 				}
 				else o.put("size", f.length());
 			}
@@ -910,6 +933,8 @@ public class FileBot extends MetaBot
 		File f = new File(getRootDir(), "fileshare.properties");
 		storeProperties(p, f);
 		mShared = p;
+
+		loadSearchIndexes();
 		
 		return newResponse();
 	}

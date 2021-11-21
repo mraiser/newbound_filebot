@@ -2,3 +2,5 @@
 /runtime/filebot/.index/
 /runtime/filebot/botd.properties
 /runtime/filebot/fileshare.properties
+/runtime/filebot/directoryindex_error.txt
+/runtime/filebot/excludefromsearch.txt
