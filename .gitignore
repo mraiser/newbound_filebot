@@ -4,3 +4,4 @@
 /runtime/filebot/fileshare.properties
 /runtime/filebot/directoryindex_error.txt
 /runtime/filebot/excludefromsearch.txt
+data/filebot/version.txt
