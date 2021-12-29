@@ -1,0 +1,76 @@
+.powerheader .mdl-layout__drawer-button {
+  padding-top: 12px;
+  height: 40px;
+}
+
+.powerheader a {
+  text-decoration:none;
+  color: rgb(66,66,66);
+}
+
+.filebotbg{
+  background-color:white;
+}
+
+.mdl-button--fab.mdl-button--colored{
+  background-color:#83bc00;
+} 
+
+.mdl-button--fab.mdl-button--colored:hover{
+  background-color:#b7ef49;
+}
+
+.menubutton {
+  position:absolute;
+  left:20px;
+  cursor:pointer;
+  border-bottom:none;
+}
+
+.page-content{
+  padding:20px;
+}
+
+.flex{
+  display:flex;
+  flex-wrap:wrap;
+  justify-content:left;
+  position:relative;
+}
+
+.mdl-chip{
+  margin-right:10px;
+  cursor:pointer;
+}
+
+.settingsbutton{
+  font-size:xx-large;
+  margin-right: -40px;
+  cursor:pointer;
+}
+
+.settingsmenu{
+  position: fixed;
+  top:16px;
+  right:16px;
+  z-index:100;
+  width:600px;
+  max-width:90%;
+  max-height:90%;
+  overflow-y:auto;
+  display:none;
+}
+
+.deletesettings{
+  position:absolute;
+  top:86px;
+  right:56px;
+}
+
+.sharename{
+  width:100px;
+}
+
+.addshareshere > tr {
+  height:40px;
+}

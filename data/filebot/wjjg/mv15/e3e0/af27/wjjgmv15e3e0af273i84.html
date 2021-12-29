@@ -1,0 +1,10 @@
+<form action="uploadfile" enctype="mime/multipart">
+	<span class="btn btn-success fileinput-button"><i class="glyphicon glyphicon-plus"></i><span>Drag file or click here to upload...</span><input id="fileupload" type="file" name="files[]" onchange="$('#funame').val(this.value)"></span>
+	<div id="progress" class="progress">
+		<div class="progress-bar progress-bar-success">
+		</div>
+	</div>
+	<div id="files" class="files">
+	</div>
+	<input type="hidden" name="path" value="/files/0000"><input type="hidden" id="funame" name="name" value="">
+</form>

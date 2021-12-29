@@ -1,0 +1,61 @@
+.powerheader .mdl-layout__drawer-button {
+  padding-top: 12px;
+  height: 40px;
+}
+
+.powerheader a {
+  text-decoration:none;
+  color: rgb(66,66,66);
+}
+
+.filebotbg{
+  background-color:white;
+}
+
+.mdl-button--fab.mdl-button--colored{
+  background-color:#83bc00;
+} 
+
+.mdl-button--fab.mdl-button--colored:hover{
+  background-color:#b7ef49;
+}
+
+.menubutton {
+  position:absolute;
+  left:20px;
+  cursor:pointer;
+  border-bottom:none;
+}
+
+.page-content{
+  padding:20px;
+}
+
+.restofthesettings{
+  display:none;
+}
+
+.note{
+  font-style: italic;
+  margin-bottom: 20px;
+}
+
+.pad20{
+  padding: 20px;
+}
+
+.raise20{
+  margin-top:-20px;
+}
+
+.refreshindex{
+  margin-left:20px;
+}
+
+.hideme{
+  display:none;
+}
+
+.sharetable, .searchindex, .excludetable{
+  margin-top:20px;
+}

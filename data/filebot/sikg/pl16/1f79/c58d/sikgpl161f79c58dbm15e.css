@@ -1,0 +1,19 @@
+.fileinfowrap{
+  padding:20px;
+  cursor:pointer;
+}
+
+.uploadbutton{
+  clear:both;
+}
+
+.folderinfo{
+  width:1000000px;
+  max-width:100%;
+}
+
+.searchbar{
+  position:absolute;
+  top:-60px;
+  right:0px;
+}
