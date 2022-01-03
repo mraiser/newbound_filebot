@@ -19,17 +19,24 @@ function searchFiles(){
     if (!me.gotwsdata){
       if (result.list.length>0)
         for (var i in result.list)
-          el.append('<pre>'+result.list[i]+'</pre>');
-      else el.append('<i>no results found</i>');
+          addResultRow(result.list[i]);
+      else el.append('<i>No results found. </i>');
     }
     me.gotwsdata = false;
     el.append('<i>Search done</i>');
   }, ME.DATA.peer);
 }
 
+function addResultRow(filename){
+  var el = $('<a class="ablock" target="_blank"/>');
+  el.prop('href', '../filebot/local'+filename);
+  el.text(filename);
+  $(ME).find('.filesearchresults').append(el);
+}
+
 me.wscb = function(x){
   me.gotwsdata = true;
-  $(ME).find('.filesearchresults').append('<pre>'+x.msg+'</pre>');
+  addResultRow(x.msg);
 };
 
 $(document).click(function(event) {
