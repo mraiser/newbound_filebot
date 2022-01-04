@@ -25,15 +25,29 @@
           <input type="checkbox" id="indexcontent" class="mdl-switch__input">
           <span class="mdl-switch__label">Search Content</span>
         </label>  
+        <br><br>
         <form action="#">
           <div class="mdl-textfield mdl-js-textfield mdl-textfield--floating-label indexworkdir">
             <input class="mdl-textfield__input" type="text" id="indexworkdir">
             <label class="mdl-textfield__label" for="indexworkdir">Working Directory</label>
           </div>
+		  <br>
+          <div class="mdl-textfield mdl-js-textfield mdl-textfield--floating-label indexcharset">
+            <input class="mdl-textfield__input" type="text" id="indexcharset">
+            <label class="mdl-textfield__label" for="indexcharset">Character Set</label>
+          </div>
         </form>
+        <b>Compression Factor: </b>
+        <input style="width:30px;" type="number" class="indexcompression">
+        (1 = No compression)
+        <br>
+        <b>Max File Size: </b>
+        <input style="width:80px;" type="number" class="indexmaxfilesize"> bytes
+        <br>
+        <br>
         <div class='pad20 raise20'>
           <div class='note'>
-            NOTE: If you change any of these settings you should first delete the existing index, then save the new settings, and finally refresh the index.
+            NOTE: <b>BEFORE</b> you change any of these settings you should first delete the existing index, then change and save the new settings, and finally refresh the index.
           </div>
           <button class="mdl-button mdl-js-button mdl-button--raised mdl-js-ripple-effect deleteindex">
             Delete Index
@@ -41,6 +55,9 @@
           <button class="mdl-button mdl-js-button mdl-button--raised mdl-js-ripple-effect refreshindex">
             Refresh Index
           </button>
+          <!-- button class="mdl-button mdl-js-button mdl-button--raised mdl-js-ripple-effect testindex">
+            Test Index
+          </button -->
         </div>
         <hr/>
         <h2 class="mdl-card__title-text">Exclude Directories From Search Index Refresh</h2>

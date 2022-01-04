@@ -26,6 +26,9 @@ public class FileBot extends MetaBot
 	Hashtable<String, DirectoryIndex> mIndex = new Hashtable();
 	//boolean mLazyIndex = true;
 	boolean mIndexContent = true;
+	double mIndexCompression = 1;
+	int mIndexMaxFileSize = 5 * 1024 * 1024;
+	String mIndexCharset = "abcdefghijklmnopqrstuvwxyz0123456789.-_";
 	
 	private FilenameFilter nodots = new FilenameFilter() 
 	{
@@ -52,15 +55,20 @@ public class FileBot extends MetaBot
 		catch (Exception x) { x.printStackTrace(); }
 	}
 
-	private void loadSearchIndexes() {
+	public void loadSearchIndexes() throws IOException
+	{
 		mIndex.clear();
+		loadBotProperties();
 		if (PROPERTIES.getProperty("searchindex", "false").equals("true"))
 		{
 			File workdir;
 
 			if (PROPERTIES.getProperty("indexworkdir") != null) workdir = new File(PROPERTIES.getProperty("indexworkdir"));
 			else workdir = new File(getRootDir(), ".index");
-			mIndexContent = PROPERTIES.getProperty("indexcontent", "true").equals("true");
+			mIndexContent = PROPERTIES.getProperty("indexcontent", ""+mIndexContent).equals("true");
+			mIndexCompression = Math.max(1, Double.parseDouble(PROPERTIES.getProperty("indexcompression", ""+mIndexCompression)));
+			mIndexMaxFileSize = Integer.parseInt(PROPERTIES.getProperty("indexmaxfilesize", ""+mIndexMaxFileSize));
+			mIndexCharset = PROPERTIES.getProperty("indexcharset", mIndexCharset);
 
 			File root = getRootDir();
 			File f = new File(root, "excludefromsearch.txt");
@@ -80,11 +88,11 @@ public class FileBot extends MetaBot
 						new File(path),
 						workdir,
 						new NoDotFilter(),
-						"abcdefghijklmnopqrstuvwxyz0123456789.-_",
+						mIndexCharset,
 						(short)3,
-						1,
+						mIndexCompression,
 						mIndexContent,
-						5 * 1024 * 1024);
+						mIndexMaxFileSize);
 				if (excludes != null) di.exclude(excludes);
 				mIndex.put(share, di);
 			}

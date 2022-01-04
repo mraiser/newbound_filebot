@@ -20,6 +20,16 @@ me.ready = function(){
         el = $(ME).find('.indexworkdir');
         el.find('input').val(result.data.indexworkdir);
         el[0].MaterialTextfield.checkDirty();
+        
+        el = $(ME).find('.indexcompression');
+        el.val(result.data.indexcompression);
+        
+        el = $(ME).find('.indexmaxfilesize');
+        el.val(result.data.indexmaxfilesize);
+
+        el = $(ME).find('.indexcharset');
+        el.find('input').val(result.data.indexcharset);
+        el[0].MaterialTextfield.checkDirty();
       }
     }
     
@@ -34,12 +44,21 @@ me.ready = function(){
 
   });
 };
-
+/*
+$(ME).find('.testindex').click(function(){
+  send_testindexsettings(function(result){
+    console.log(result);
+  });
+});
+*/
 $(ME).find('.saveindexsettings').click(function(){
   var searchindex = $(ME).find('.searchindex').find('input').prop('checked');
   var indexcontent = $(ME).find('.indexcontent').find('input').prop('checked');
   var indexworkdir = $(ME).find('.indexworkdir').find('input').val();
-  send_saveindexsettings(searchindex, indexcontent, indexworkdir, function(result){
+  var indexcompression = $(ME).find('.indexcompression').val();
+  var indexmaxfilesize = $(ME).find('.indexmaxfilesize').val();
+  var indexcharset = $(ME).find('.indexcharset').find('input').val();
+  send_saveindexsettings(searchindex, indexcontent, indexworkdir, indexcompression, indexmaxfilesize, indexcharset, function(result){
     if (result.status != 'ok') alert(result.msg);
     else{
       var settings = '';
