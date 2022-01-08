@@ -51,14 +51,16 @@ me.ready = function(){
       ME.DATA.peer = peer;
       path = i == -1 ? '/' : path.substring(i);
       if (i == -1) mf('.folderbuttons').css('display', 'none');
-      else mf('.downloadbutton').prop('href', '../peerbot/remote/'+peer+'/filebot/zipdir/archive.zip?path='+encodeURIComponent(path));
+      else {
+        mf('.downloadbutton').prop('href', '../peerbot/remote/'+peer+'/filebot/zipdir/archive.zip?path='+encodeURIComponent(path));
       
-      var el = $(ME).find('.searchbar');
-      var d = {
-        "path": path,
-        "peer": peer
-      };
-      installControl(el[0], 'filebot', 'search', function(api){}, d);
+        var el = $(ME).find('.searchbar');
+        var d = {
+          "path": path,
+          "peer": peer
+        };
+        installControl(el[0], 'filebot', 'search', function(api){}, d);
+      }
       
       json('../peerbot/remote/'+peer+'/filebot/fileinfo', 'path='+encodeURIComponent(path)+'&children=false', function(result){
         if (result.list.length == 0) mf('.folderinfo').html('<div style="width:100000px;padding:40px;"><i>This folder is empty.</i></div>');

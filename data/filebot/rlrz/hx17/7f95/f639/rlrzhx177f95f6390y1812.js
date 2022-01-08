@@ -14,6 +14,7 @@ function searchFiles(){
   var path = ME.DATA.path ? ME.DATA.path : '/';
   var params = 'path='+encodeURIComponent(path)+'&query='+encodeURIComponent(query)+'&uuid='+encodeURIComponent(me.UUID);
       
+  var now = new Date().getTime();
   json(me.prefix+'filebot/search', params, function(result){
     var el = $(ME).find('.filesearchresults');
     if (!me.gotwsdata){
@@ -23,7 +24,7 @@ function searchFiles(){
       else el.append('<i>No results found. </i>');
     }
     me.gotwsdata = false;
-    el.append('<i>Search done</i>');
+    el.append('<i>Search done in '+(new Date().getTime()-now)+'ms</i>');
   }, ME.DATA.peer);
 }
 
