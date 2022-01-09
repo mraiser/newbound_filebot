@@ -32,12 +32,13 @@ function searchFiles(){
       json(me.prefix+'filebot/search', params, function(result){
         var el = $(ME).find('.filesearchresults');
         if (result.status == 'ok'){
-          if (!me.gotwsdata){
-            if (result.list.length>0)
-              for (var i in result.list)
-                addResultRow(result.list[i]);
-            else el.append('<i>No results found. </i>');
-          }
+          if (me.gotwsdata) el.empty();
+            
+          if (result.list.length>0)
+            for (var i in result.list)
+              addResultRow(result.list[i]);
+          else el.append('<i>No results found. </i>');
+
           me.gotwsdata = false;
           el.append('<i>Search done in '+(new Date().getTime()-now)+'ms</i>');
         }
